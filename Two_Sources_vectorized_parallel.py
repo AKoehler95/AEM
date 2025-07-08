@@ -16,10 +16,10 @@ from datetime import timedelta
 import multiprocessing as mp
 
 #Parameter
-alpha_l = 2
-alpha_t = 0.2
+alpha_l = 1
+alpha_t = 0.02
 beta = 1/(2*alpha_l)
-C0 = 10
+C0 = 5
 C1 = -8               #-8 for acceptor source
 Ca = 8
 gamma = 3.5

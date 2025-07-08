@@ -32,7 +32,7 @@ q = (d**2*beta**2)/4
 n = 10            #Number of terms in mathieu series
 M = 100           #Number of Control Points, 5x overspecification
 
-inc = 0.2      #discretisation
+inc = 0.1      #discretisation
 
 #Mathieu Functions
 m = mf.mathieu(q)
