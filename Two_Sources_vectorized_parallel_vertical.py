@@ -257,7 +257,7 @@ if __name__ ==  '__main__':
     # # #plt.clabel(Plume, fmt=Label, manual = [(50, -(2*np.max(result[1])*inc-np.abs(result[0][0])))])
     print('Lmax =', int(np.max(Lmax.vertices[:,:])*inc)) #int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0])
     # plt.tight_layout()
-    plt.savefig('fig10.pdf')
+    # plt.savefig('fig10.pdf')
     plt.show()
 #%%
 # ##absolut error [mg/l]
