@@ -20,17 +20,17 @@ import multiprocessing as mp
 #Parameter
 element_type = 'circle'     # can be either 'line' or 'circle'
 r = 1
-alpha_l = 2
-alpha_t = 0.2
+alpha_l = 1
+alpha_t = 0.02
 beta = 1/(2*alpha_l)
-C0 = 10
+C0 = 5
 Ca = 8
 gamma = 3.5
 
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)           #focal distance: c**2 = a**2 - b**2 --> c = +/-SQRT(a**2 - b**2)
 q = (d**2*beta**2)/4
-
-n = 7             #Number of terms in mathieu series -1
+# print(d,q)
+n = 9             #Number of terms in mathieu series -1
 M = 100          #Number of Control Points, 5x overspecification
 
 #wrapper xy to eta psi
@@ -81,7 +81,7 @@ def Yo(order, eta):                    #odd radial second Kind
 
 #Target Function
 def F1(x1):
-    return (C0*gamma+Ca)*np.exp(-beta*x1)
+    return (C0*gamma+Ca)*np.exp(-beta*0)
 
 #System of Equations to calculate coefficients
 lst = []                                                                        #empty array
@@ -104,7 +104,7 @@ for u in range(0, M):                                                           
     F.append(F1(x1[u])) #
 
 Coeff = np.linalg.lstsq(F_M, F, rcond=None)
-print(Coeff[0])
+# print(Coeff[0])
 
 #comprehensive solution
 def c(x, y):
@@ -129,10 +129,9 @@ def c(x, y):
         return ((((F*np.exp(beta*x)))-Ca)/gamma).round(9)
     else:
         return ((F*np.exp(beta*x))-Ca).round(9)
-
 #%%
 
-inc = 1
+inc = 0.1
 # Define a helper function for `Pool.map`
 def compute_conc(point):
     x, y = point
@@ -163,33 +162,43 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 if __name__ ==  '__main__':
     start = timeit.default_timer()
 
-    result = Conc_array(0, 200+inc, -10, 10+inc, inc)
+    result = Conc_array(0, 250+inc, -5, 5+inc, inc)
 
     stop = timeit.default_timer()
     sec = int(stop - start)
     cpu_time = timedelta(seconds = sec)
     print('Computation time [hh:mm:ss]:', cpu_time)
 
-    plt.figure(figsize=(16, 9), dpi = 300)
+    plt.figure(figsize=(16, 9), dpi = 300, layout="constrained")
     mpl.rcParams.update({'font.size': 22})
-    #plt.axis('scaled')
+    # plt.axis('scaled')
     plt.xlabel('$x$ (m)')
     plt.ylabel('$y$ (m)')
-    plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)].round())
-    plt.yticks(range(len(result[1]))[::int(10/inc)], result[1][::int(10/inc)].round())
-    Plume = plt.contourf(result[2], levels=10, cmap='coolwarm') #np.linspace(Ca, 43, 10)
-    Plume_max = plt.contour(result[2], levels=[0], linewidths=1, colors='k')
-    # Source0 = plt.Circle((10, 20), 10, facecolor = 'None', edgecolor = 'red', linewidth = 5)         #adding circles in the plot
-    # plt.gca().add_patch(Source0)
-    # plt.clabel(Plume_max)
-    #Colorbar
-    norm= mpl.colors.Normalize(vmin=Plume.cvalues.min(), vmax=Plume.cvalues.max())
-    sm = plt.cm.ScalarMappable(norm=norm, cmap = Plume.cmap)
-    sm.set_array([])
-    plt.colorbar(Plume, ticks=Plume.levels, label='Concentration [mg/l]', location='bottom', aspect=75)
+    plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)].round(0))
+    plt.yticks(range(len(result[1]))[::int(10/inc)], result[1][::int(10/inc)].round(0))
+    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds') #np.linspace(Ca, 43, 10)
+    Plume_ca = plt.contourf(result[2], levels=np.linspace(-Ca, 0, 9), cmap='Blues_r')
+    Plume_max = plt.contour(result[2], levels=[0], linewidths=2, colors='k')
 
-    plt.tight_layout()
-    #plt.savefig('fig32.pdf')
+    #Colorbar
+    cbar_cd = plt.colorbar(Plume_cd, ticks=Plume_cd.levels, label='Electron donor concentration [mg/l]', location='bottom', aspect=75)
+    cbar_ca = plt.colorbar(Plume_ca, ticks=Plume_ca.levels, label='Electron acceptor concentration [mg/l]', location='bottom', aspect=75)
+    cbar_ca.set_ticks(Plume_ca.levels)  # Ensure it uses the same tick positions
+    cbar_ca.set_ticklabels([f"{abs(level):.0f}" for level in Plume_ca.levels])
+
+
+    # Get one of the original colorbar positions to reuse width/height
+    bar_height = 0.01
+    bar_width = 0.8
+    bar_x = 0.1
+
+    # Set tighter vertical positions
+    cbar_ca.ax.set_position([bar_x, 0, bar_width, bar_height])  # Acceptor (top one)
+    cbar_cd.ax.set_position([bar_x, 1, bar_width, bar_height])  # Donor (bottom one)
+
+
+    # plt.tight_layout()
+    # plt.savefig('fig32.pdf')
     plt.show()
 
     #Colorbar
@@ -210,11 +219,11 @@ if __name__ ==  '__main__':
 #absolut error [mg/l]
     phi2 = np.linspace(0, 2*np.pi, 360)
     if element_type == 'circle':
-        x_test = (r) * np.cos(phi2)
-        y_test = (r) * np.sin(phi2)
+        x_test = (r + 1e-9) * np.cos(phi2)
+        y_test = (r + 1e-9) * np.sin(phi2)
     if element_type == 'line':
         x_test = np.linspace(0, 0, 360)
-        y_test = (r) * np.sin(phi2) #np.linspace(-r, r, 360)
+        y_test = (r + 1e-9) * np.sin(phi2) #np.linspace(-r, r, 360)
 
 
     Err = []
@@ -235,4 +244,3 @@ if __name__ ==  '__main__':
     plt.xticks(np.linspace(0, 2*np.pi, 7), np.linspace(0, 360, 7))
     plt.xlim([0, 2*np.pi])
     plt.savefig('fig_supp1.pdf')
-

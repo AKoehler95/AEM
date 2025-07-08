@@ -17,22 +17,22 @@ import multiprocessing as mp
 
 #Parameter
 r = 1
-alpha_l = 2
-alpha_t = 0.02
-C0 = 10
+alpha_l = 1
+alpha_t = 0.005
+C0 = 5
 C1 = -C0               #-8 for acceptor source
 Ca = 8
-gamma = 3.5
+gamma = 3
 
 
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)
 beta = 1/(2*alpha_l)
 q = (d**2*beta**2)/4
 
-n = 11            #Number of terms in mathieu series
+n = 10            #Number of terms in mathieu series
 M = 100           #Number of Control Points, 5x overspecification
 
-inc = 0.1      #discretisation
+inc = 0.2      #discretisation
 
 #Mathieu Functions
 m = mf.mathieu(q)
@@ -73,7 +73,7 @@ y1 = r*np.sin(phi)
 
 #source coordinates xy and distance of second source
 D1 = 0
-D2 = 2*r+2*inc
+D2 = 2.1*r
 x2 = x1 - D1
 y2 = y1 - D2
 x3 = x1 + D1
@@ -87,7 +87,6 @@ psi3 = uv_vec(x3, y3)[1]
 eta1 = uv_vec(x1, y1)[0]
 eta2 = uv_vec(x2, y2)[0]
 eta3 = uv_vec(x3, y3)[0]
-
 #%%
 #general target function:
 def F_target(x, Ci):
@@ -212,7 +211,7 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 if __name__ ==  '__main__':
     start = timeit.default_timer()
 
-    result = Conc_array(-2, 2+inc, -2, r+2*inc, inc) #r+inc
+    result = Conc_array(0, 250+inc, -5, r+2*inc , inc) #r+inc r+2*inc
 
     stop = timeit.default_timer()
     sec = int(stop - start)
@@ -220,33 +219,44 @@ if __name__ ==  '__main__':
     print('Computation time [hh:mm:ss]:', cpu_time)
 #%% plotting
 
-    plt.figure(figsize=(16, 9), dpi = 300)
+    plt.figure(figsize=(16, 9), dpi = 300, layout='constrained')
     mpl.rcParams.update({'font.size': 22})
     #plt.axis('equal')
-    plt.axis('scaled')
+    # plt.axis('scaled')
     plt.xlabel('$x$ (m)')
     plt.ylabel('$z$ (m)')
 
-    plt.xticks(range(len(result[0]))[::int(1/inc)], result[0][::int(1/inc)])
+    plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)])
     plt.yticks(range(len(result[1]))[::int(1/inc)], result[1][::int(1/inc)])
 
     divnorm = mpl.colors.TwoSlopeNorm(vmin=-Ca, vcenter=0, vmax=C0)
-    Plume = plt.contourf(result[2], levels=10, cmap='coolwarm', norm=divnorm) # np.arange(-Ca, C0+0.1*Ca, 0.1*Ca), norm=divnorm ###np.arange(0, C0, Ca)
-    Plume_max = plt.contour(result[2], levels=[9.99999], linewidths=5, colors='k')
+    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds') # np.arange(-Ca, C0+0.1*Ca, 0.1*Ca), norm=divnorm ###np.arange(0, C0, Ca)
+    Plume_ca = plt.contourf(result[2], levels=np.linspace(-8.01, 0, 9), cmap='Blues_r')
+    Plume_max = plt.contour(result[2], levels=[0], linewidths=2, colors='k')
 
-    # #Colorbar
-    # norm= mpl.colors.Normalize(vmin=Plume.cvalues.min(), vmax=Plume.cvalues.max())
-    # sm = plt.cm.ScalarMappable(norm=norm, cmap = Plume.cmap)
-    # sm.set_array([])
-    # plt.colorbar(Plume, ticks=Plume.levels, label='Concentration [mg/l]', location='bottom', aspect=75)
+    #Colorbar
+    cbar_cd = plt.colorbar(Plume_cd, ticks=Plume_cd.levels, label='Electron donor concentration [mg/l]', location='bottom', aspect=75)
+    cbar_ca = plt.colorbar(Plume_ca, ticks=Plume_ca.levels, label='Electron acceptor concentration [mg/l]', location='bottom', aspect=75)
+    cbar_ca.set_ticks(Plume_ca.levels)  # Ensure it uses the same tick positions
+    cbar_ca.set_ticklabels([f"{abs(level):.0f}" for level in Plume_ca.levels])
+
+    plt.subplots_adjust(bottom=0)  # Increase if needed
+
+    # Get one of the original colorbar positions to reuse width/height
+    bar_height = 0.01
+    bar_width = 0.8
+    bar_x = 0.1
+
+    # Set tighter vertical positions
+    cbar_ca.ax.set_position([bar_x, 0, bar_width, bar_height])  # Acceptor (top one)
+    cbar_cd.ax.set_position([bar_x, 1, bar_width, bar_height])  # Donor (bottom one)
+
 
     # Label = '$C_{D}=C_{A}=0$'
     Lmax = Plume_max.get_paths()[0]
     # # #plt.clabel(Plume, fmt=Label, manual = [(50, -(2*np.max(result[1])*inc-np.abs(result[0][0])))])
     print('Lmax =', int(np.max(Lmax.vertices[:,:])*inc)) #int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0])
-    # textbox = r'$L_{max} = 549 m$' #+ str(int(np.max(Lmax.vertices[:, int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0]))) + ' m'
-    # plt.text(200, 30, textbox)
-    plt.tight_layout()
+    # plt.tight_layout()
     plt.savefig('fig10.pdf')
     plt.show()
 #%%

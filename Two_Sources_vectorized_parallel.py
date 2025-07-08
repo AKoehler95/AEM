@@ -20,7 +20,7 @@ alpha_l = 2
 alpha_t = 0.2
 beta = 1/(2*alpha_l)
 C0 = 10
-C1 = -8                #-8 for acceptor source
+C1 = -8               #-8 for acceptor source
 Ca = 8
 gamma = 3.5
 r = 1
@@ -178,7 +178,7 @@ def c(x, y):
 #%%
 # #concentration array for plotting purpose
 
-inc = 0.5
+inc = 0.1
 # Define a helper function for `Pool.map`
 def compute_conc(point):
     x, y = point
@@ -217,27 +217,34 @@ if __name__ ==  '__main__':
     print('Computation time [hh:mm:ss]:', cpu_time)
 #%% plotting
 
-    plt.figure(figsize=(16, 9), dpi = 300)
+    plt.figure(figsize=(16, 9), dpi = 300, layout='constrained')
     mpl.rcParams.update({'font.size': 22})
-    #plt.axis('scaled')
+    plt.axis('scaled')
     plt.xlabel('$x$ (m)')
     plt.ylabel('$y$ (m)')
 
     plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)].round(0))
     plt.yticks(range(len(result[1]))[::int(10/inc)], result[1][::int(10/inc)].round(0))
-    Plume = plt.contourf(result[2], levels=10, cmap='coolwarm') #np.linspace(Ca, 43, 10)
+    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds')
+    Plume_ca = plt.contourf(result[2], levels=np.linspace(-8.01, 0, 9), cmap='Blues_r')
     Plume_max = plt.contour(result[2], levels=[0], linewidths=2, colors='k')
 
-    # Source0 = plt.Circle((result[0].tolist().index(0), result[1].tolist().index(0)), 2, color = F_target(x1[u], C0)[2])         #adding circles in the plot
-    # Source1 = plt.Circle((result[0].tolist().index(0)+(D1/inc), result[1].tolist().index(0)+(D2/inc)), 2, color = F_target(x3[v], C1)[2])   #adding circles in the plot
-    # plt.gca().add_patch(Source0)
-    # plt.gca().add_patch(Source1)
-
     #Colorbar
-    norm= mpl.colors.Normalize(vmin=Plume.cvalues.min(), vmax=Plume.cvalues.max())
-    sm = plt.cm.ScalarMappable(norm=norm, cmap = Plume.cmap)
-    sm.set_array([])
-    plt.colorbar(Plume, ticks=Plume.levels, label='Concentration [mg/l]', location='bottom', aspect=75)
+    cbar_cd = plt.colorbar(Plume_cd, ticks=Plume_cd.levels, label='Electron donor concentration [mg/l]', location='bottom', aspect=75)
+    cbar_ca = plt.colorbar(Plume_ca, ticks=Plume_ca.levels, label='Electron acceptor concentration [mg/l]', location='bottom', aspect=75)
+    cbar_ca.set_ticks(Plume_ca.levels)  # Ensure it uses the same tick positions
+    cbar_ca.set_ticklabels([f"{abs(level):.0f}" for level in Plume_ca.levels])
+
+    plt.subplots_adjust(bottom=0)  # Increase if needed
+
+    # Get one of the original colorbar positions to reuse width/height
+    bar_height = 0.01
+    bar_width = 0.8
+    bar_x = 0.1
+
+    # Set tighter vertical positions
+    cbar_ca.ax.set_position([bar_x, 0, bar_width, bar_height])  # Acceptor (top one)
+    cbar_cd.ax.set_position([bar_x, 1, bar_width, bar_height])  # Donor (bottom one)
 
 
     # Label = '$C_{D}=C_{A}=0$'
@@ -247,8 +254,8 @@ if __name__ ==  '__main__':
     print('Lmax =', int(np.max(Lmax.vertices[:,:])*inc))
     # textbox = r'$L_{max} = 549 m$' #+ str(int(np.max(Lmax.vertices[:, int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0]))) + ' m'
     # plt.text(200, 30, textbox)
-    plt.tight_layout()
-    #plt.savefig('fig53.pdf')
+    # plt.tight_layout()
+    plt.savefig('fig53.pdf')
     plt.show()
 
 #%%
