@@ -16,7 +16,7 @@ from datetime import timedelta
 import multiprocessing as mp
 
 #Parameter
-alpha_l = 1
+alpha_l = 2
 alpha_t = 0.02
 beta = 1/(2*alpha_l)
 C0 = 5
@@ -255,7 +255,7 @@ if __name__ ==  '__main__':
     # textbox = r'$L_{max} = 549 m$' #+ str(int(np.max(Lmax.vertices[:, int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0]))) + ' m'
     # plt.text(200, 30, textbox)
     # plt.tight_layout()
-    plt.savefig('fig53.pdf')
+    # plt.savefig('fig53.pdf')
     plt.show()
 
 #%%
