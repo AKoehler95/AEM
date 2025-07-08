@@ -16,13 +16,13 @@ from datetime import timedelta
 import multiprocessing as mp
 
 #Parameter
-r = 1
-alpha_l = 1
+alpha_l = 2
 alpha_t = 0.005
 C0 = 5
 C1 = -C0               #-8 for acceptor source
 Ca = 8
 gamma = 3
+r = 1
 
 
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)
@@ -211,7 +211,7 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 if __name__ ==  '__main__':
     start = timeit.default_timer()
 
-    result = Conc_array(0, 250+inc, -5, r+2*inc , inc) #r+inc r+2*inc
+    result = Conc_array(0, 250+inc, -5, r+2*inc , inc)
 
     stop = timeit.default_timer()
     sec = int(stop - start)
