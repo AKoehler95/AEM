@@ -22,7 +22,7 @@ C0 = 5
 C1 = -C0               #-8 for acceptor source
 Ca = 8
 gamma = 3
-r = 1
+r = 0.25
 
 
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)
