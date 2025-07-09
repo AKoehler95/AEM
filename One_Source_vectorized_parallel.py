@@ -35,23 +35,46 @@ M = 100          #Number of Control Points, 5x overspecification
 
 #wrapper xy to eta psi
 def uv(x, y):
-    Y = np.sqrt(alpha_l/alpha_t)*y
-    B = x**2+Y**2-d**2
-    p = (-B+np.sqrt(B**2+4*d**2*x**2))/(2*d**2)
-    q = (-B-np.sqrt(B**2+4*d**2*x**2))/(2*d**2)
+    """
+    Convert Cartesian (x, y) to elliptic coordinates (eta, psi),
+    with foci at (±d, 0) and optional anisotropy.
 
-    psi_0 = np.arcsin(np.sqrt(p))
+    Parameters:
+        x, y     : Cartesian coordinates
+        d        : half-distance between foci
 
+    Returns:
+        eta, psi : elliptic coordinates
+    """
+    Y = np.sqrt(alpha_l / alpha_t) * y
+    B = x**2 + Y**2 - d**2
+    discriminant = B**2 + 4 * d**2 * x**2
+
+    # Safety against numerical issues
+    discriminant = max(discriminant, 0.0)
+    sqrt_disc = np.sqrt(discriminant)
+
+    p = (-B + sqrt_disc) / (2 * d**2)
+    q = (-B - sqrt_disc) / (2 * d**2)
+
+    # Clip p to [0, 1] for arcsin safety
+    p_clipped = np.clip(p, 0, 1)
+    psi_0 = np.arcsin(np.sqrt(p_clipped))
+
+    # Determine correct quadrant
     if Y >= 0 and x >= 0:
         psi = psi_0
-    if Y < 0 and x >= 0:
-        psi = np.pi-psi_0
-    if Y <= 0 and x < 0:
-        psi = np.pi+psi_0
-    if Y > 0 and x < 0:
-        psi = 2*np.pi-psi_0
+    elif Y < 0 and x >= 0:
+        psi = np.pi - psi_0
+    elif Y <= 0 and x < 0:
+        psi = np.pi + psi_0
+    else:  # Y > 0 and x < 0
+        psi = 2 * np.pi - psi_0
 
-    eta = 0.5*np.log(1-2*q+2*np.sqrt(q**2-q))
+    # Compute eta
+    inner = 1 - 2*q + 2 * np.sqrt(max(q**2 - q, 0.0))
+    eta = 0.5 * np.log(inner)
+
     return eta, psi
 
 #polar coordinates
