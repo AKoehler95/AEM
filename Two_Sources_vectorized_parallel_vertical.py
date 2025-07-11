@@ -22,17 +22,17 @@ C0 = 5
 C1 = -C0               #-8 for acceptor source
 Ca = 8
 gamma = 3
-r = 0.25
+r = 1
 
 
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)
 beta = 1/(2*alpha_l)
 q = (d**2*beta**2)/4
 
-n = 10            #Number of terms in mathieu series
+n = 7             #Number of terms in mathieu series
 M = 100           #Number of Control Points, 5x overspecification
 
-inc = 0.1      #discretisation
+inc = 0.2      #discretisation
 
 #Mathieu Functions
 m = mf.mathieu(q)
