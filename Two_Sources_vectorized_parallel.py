@@ -17,10 +17,10 @@ import multiprocessing as mp
 
 #Parameter
 alpha_l = 2
-alpha_t = 0.02
+alpha_t = 0.05
 beta = 1/(2*alpha_l)
-C0 = 5
-C1 = -8               #-8 for acceptor source
+C0 = 10
+C1 = 10               #-8 for acceptor source
 Ca = 8
 gamma = 3.5
 r = 1
@@ -28,7 +28,7 @@ r = 1
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)
 q = (d**2*beta**2)/4
 
-n = 9            #Number of terms in mathieu series
+n = 7            #Number of terms in mathieu series
 M = 100           #Number of Control Points, 5x overspecification
 
 #Mathieu Functions
@@ -94,8 +94,8 @@ x1 = r*np.cos(phi)
 y1 = r*np.sin(phi)
 
 #source coordinates xy and distance of second source
-D1 = 75
-D2 = 0
+D1 = 50
+D2 = 10
 x2 = x1 - D1
 y2 = y1 - D2
 x3 = x1 + D1
@@ -234,7 +234,7 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 if __name__ ==  '__main__':
     start = timeit.default_timer()
 
-    result = Conc_array(0, 100+inc, -10, 10+inc, inc)
+    result = Conc_array(0, 1200+inc, -10, 20+inc, inc)
 
     stop = timeit.default_timer()
     sec = int(stop - start)
@@ -244,7 +244,7 @@ if __name__ ==  '__main__':
 
     plt.figure(figsize=(16, 9), dpi = 300, layout='constrained')
     mpl.rcParams.update({'font.size': 22})
-    plt.axis('scaled')
+    # plt.axis('scaled')
     plt.xlabel('$x$ (m)')
     plt.ylabel('$y$ (m)')
 
@@ -272,15 +272,8 @@ if __name__ ==  '__main__':
     cbar_cd.ax.set_position([bar_x, 1, bar_width, bar_height])  # Donor (bottom one)
 
 
-    # Label = '$C_{D}=C_{A}=0$'
     Lmax = Plume_max.get_paths()[0]
-    # #plt.clabel(Plume, fmt=Label, manual = [(50, -(2*np.max(result[1])*inc-np.abs(result[0][0])))])
-    # print('Lmax =', int(np.max(Lmax.vertices[:, int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0]))) #
     print('Lmax =', int(np.max(Lmax.vertices[:,:])*inc))
-    # textbox = r'$L_{max} = 549 m$' #+ str(int(np.max(Lmax.vertices[:, int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0]))) + ' m'
-    # plt.text(200, 30, textbox)
-    # plt.tight_layout()
-    # plt.savefig('fig53.pdf')
     plt.show()
 
 #%%

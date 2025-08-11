@@ -6,7 +6,7 @@ Created on Sun May 22 09:48:56 2022
 @author: anton
 """
 import numpy as np
-np.seterr(divide='ignore', invalid='ignore')                #dont print warnings
+np.seterr(divide='ignore', invalid='ignore', over='ignore', under='ignore')                #dont print warnings
 np.set_printoptions(precision=9)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -17,22 +17,19 @@ import multiprocessing as mp
 
 #Parameter
 alpha_l = 2
-alpha_t = 0.005
+alpha_t = 0.05
+beta = 1/(2*alpha_l)
 C0 = 10
-C1 = -C0               #-8 for acceptor source
+C1 = -8               #-8 for acceptor source
 Ca = 8
 gamma = 3.5
 r = 1
 
-
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)
-beta = 1/(2*alpha_l)
 q = (d**2*beta**2)/4
 
-n = 9             #Number of terms in mathieu series
+n = 7            #Number of terms in mathieu series
 M = 100           #Number of Control Points, 5x overspecification
-
-inc = 0.1      #discretisation
 
 #Mathieu Functions
 m = mf.mathieu(q)
@@ -97,8 +94,8 @@ x1 = r*np.cos(phi)
 y1 = r*np.sin(phi)
 
 #source coordinates xy and distance of second source
-D1 = 0
-D2 = 2*r+0.2
+D1 = 75
+D2 = 0
 x2 = x1 - D1
 y2 = y1 - D2
 x3 = x1 + D1
@@ -112,13 +109,14 @@ psi3 = uv_vec(x3, y3)[1]
 eta1 = uv_vec(x1, y1)[0]
 eta2 = uv_vec(x2, y2)[0]
 eta3 = uv_vec(x3, y3)[0]
+
 #%%
 #general target function:
 def F_target(x, Ci):
     if Ci > 0:
         return (Ci*gamma+Ca)*np.exp(-beta*x), (Ci), 'r'
     if Ci <= 0:
-        return -(abs(Ci)*gamma+Ca)*np.exp(-beta*x), (Ci), 'r'# (Ci)*np.exp(-beta*x), (Ci), 'b'
+        return (Ci+Ca)*np.exp(-beta*x), (Ci), 'b'
 
 #System of Equations to calculate coefficients
 #"perspective" source 1
@@ -172,7 +170,7 @@ for v in range(0, M):
     F.append(F_target(x3[v], C1)[0])
 
 Coeff = np.linalg.lstsq(F_M, F, rcond=None)
-#print(Coeff[0])
+print(Coeff[0])
 
 #%%
 def c(x, y):
@@ -196,24 +194,24 @@ def c(x, y):
         F2 += Coeff[0][(2*n-1)+(2*b-1)]*So(b, psi2)*Yo(b, eta2) \
             + Coeff[0][(2*n-1)+(2*b)]*Se(b, psi2)*Ye(b, eta2)                   #till here F domain
 
-    # return (((F1*np.exp(beta*x) + F2*np.exp(beta*x))-Ca)/gamma).round(9)              #from here C domain
+    # return (F1*np.exp(beta*x) + F2*np.exp(beta*x)).round(9)              #from here C domain
 
     if (F1*np.exp(beta*x) + F2*np.exp(beta*x))> Ca:
         return (((F1*np.exp(beta*x) + F2*np.exp(beta*x))-Ca)/gamma).round(9)
     else:
-        return (((F1*np.exp(beta*x) + F2*np.exp(beta*x))-Ca)).round(9)
-
+        return ((F1*np.exp(beta*x) + F2*np.exp(beta*x))-Ca).round(9)
 #%%
-# concentration array for plotting purpose
+# #concentration array for plotting purpose
 
+inc = 0.1
 # Define a helper function for `Pool.map`
 def compute_conc(point):
     x, y = point
     return c(x, y)
 
 def Conc_array(x_min, x_max, y_min, y_max, inc):
-    xaxis = np.arange(x_min, x_max, inc).round(2)
-    yaxis = np.arange(y_min, y_max, inc).round(2)
+    xaxis = np.arange(x_min, x_max, inc)
+    yaxis = np.arange(y_min, y_max, inc)
     X, Y = np.meshgrid(xaxis, yaxis)
 
     # Flatten the grid for parallel processing
@@ -236,7 +234,7 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 if __name__ ==  '__main__':
     start = timeit.default_timer()
 
-    result = Conc_array(0, 600+inc, -5, r+2*inc , inc)
+    result = Conc_array(0, 100+inc, -5, 5+inc, inc)
 
     stop = timeit.default_timer()
     sec = int(stop - start)
@@ -246,16 +244,13 @@ if __name__ ==  '__main__':
 
     plt.figure(figsize=(16, 9), dpi = 300, layout='constrained')
     mpl.rcParams.update({'font.size': 22})
-    #plt.axis('equal')
     # plt.axis('scaled')
     plt.xlabel('$x$ (m)')
-    plt.ylabel('$z$ (m)')
+    plt.ylabel('$y$ (m)')
 
-    plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)])
-    plt.yticks(range(len(result[1]))[::int(1/inc)], result[1][::int(1/inc)])
-
-    divnorm = mpl.colors.TwoSlopeNorm(vmin=-Ca, vcenter=0, vmax=C0)
-    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds') # np.arange(-Ca, C0+0.1*Ca, 0.1*Ca), norm=divnorm ###np.arange(0, C0, Ca)
+    plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)].round(0))
+    plt.yticks(range(len(result[1]))[::int(10/inc)], result[1][::int(10/inc)].round(0))
+    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds')
     Plume_ca = plt.contourf(result[2], levels=np.linspace(-8.01, 0, 9), cmap='Blues_r')
     Plume_max = plt.contour(result[2], levels=[0], linewidths=2, colors='k')
 
@@ -276,16 +271,18 @@ if __name__ ==  '__main__':
     cbar_ca.ax.set_position([bar_x, 0, bar_width, bar_height])  # Acceptor (top one)
     cbar_cd.ax.set_position([bar_x, 1, bar_width, bar_height])  # Donor (bottom one)
 
+
     Lmax = Plume_max.get_paths()[0]
     print('Lmax =', int(np.max(Lmax.vertices[:,:])*inc))
     plt.show()
+
 #%%
-# ##absolut error [mg/l]
+#absolut error [mg/l]
     phi2 = np.linspace(0, 2*np.pi, 360)
     x_test = (r + 1e-9) * np.cos(phi2)
     y_test = (r + 1e-9) * np.sin(phi2)
 
-    x2_test = x_test-D1
+    x2_test = x_test+D1
     y2_test = y_test+D2
 
     Err = []

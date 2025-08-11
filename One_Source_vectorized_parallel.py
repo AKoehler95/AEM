@@ -20,17 +20,17 @@ import multiprocessing as mp
 #Parameter
 element_type = 'circle'     # can be either 'line' or 'circle'
 r = 1
-alpha_l = 1
-alpha_t = 0.02
+alpha_l = 2
+alpha_t = 0.05
 beta = 1/(2*alpha_l)
-C0 = 5
+C0 = 10
 Ca = 8
 gamma = 3.5
 
-d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)           #focal distance: c**2 = a**2 - b**2 --> c = +/-SQRT(a**2 - b**2)
+d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)           #semi-focal distance: c**2 = a**2 - b**2 --> c = +/-SQRT(a**2 - b**2)
 q = (d**2*beta**2)/4
 # print(d,q)
-n = 9             #Number of terms in mathieu series -1
+n = 7             #Number of terms in mathieu series -1
 M = 100          #Number of Control Points, 5x overspecification
 
 #wrapper xy to eta psi
@@ -104,7 +104,7 @@ def Yo(order, eta):                    #odd radial second Kind
 
 #Target Function
 def F1(x1):
-    return (C0*gamma+Ca)*np.exp(-beta*0)
+    return (C0*gamma+Ca)*np.exp(-beta*x1)
 
 #System of Equations to calculate coefficients
 lst = []                                                                        #empty array
@@ -146,8 +146,6 @@ def c(x, y):
         F += Coeff[0][2*w-1]*So(w, psi)*Yo(w, eta) \
             + Coeff[0][2*w]*Se(w, psi)*Ye(w, eta)
 
-    # return (((F*np.exp(beta*x))-Ca)/gamma).round(9)
-
     if ((F*np.exp(beta*x)))> Ca:
         return ((((F*np.exp(beta*x)))-Ca)/gamma).round(9)
     else:
@@ -185,7 +183,7 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 if __name__ ==  '__main__':
     start = timeit.default_timer()
 
-    result = Conc_array(0, 250+inc, -5, 5+inc, inc)
+    result = Conc_array(0, 400+inc, -5, 5+inc, inc)
 
     stop = timeit.default_timer()
     sec = int(stop - start)
@@ -199,7 +197,7 @@ if __name__ ==  '__main__':
     plt.ylabel('$y$ (m)')
     plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)].round(0))
     plt.yticks(range(len(result[1]))[::int(10/inc)], result[1][::int(10/inc)].round(0))
-    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds') #np.linspace(Ca, 43, 10)
+    Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0+0.01, 11), cmap='Reds') #np.linspace(Ca, 43, 10)
     Plume_ca = plt.contourf(result[2], levels=np.linspace(-Ca, 0, 9), cmap='Blues_r')
     Plume_max = plt.contour(result[2], levels=[0], linewidths=2, colors='k')
 
@@ -219,24 +217,9 @@ if __name__ ==  '__main__':
     cbar_ca.ax.set_position([bar_x, 0, bar_width, bar_height])  # Acceptor (top one)
     cbar_cd.ax.set_position([bar_x, 1, bar_width, bar_height])  # Donor (bottom one)
 
-
-    # plt.tight_layout()
-    # plt.savefig('fig32.pdf')
-    plt.show()
-
-    #Colorbar
-    # norm= mpl.colors.Normalize(vmin=Plume.cvalues.min(), vmax=Plume.cvalues.max())
-    # sm = plt.cm.ScalarMappable(norm=norm, cmap = Plume.cmap)
-    # sm.set_array([])
-    # plt.colorbar(Plume, ticks=Plume.levels, label='Concentration (mg/l)', location='bottom', shrink=0.8)
-
-    # Label = '$C_{D}=C_{A}=0$'
     Lmax = Plume_max.get_paths()[0]
-
     print('Lmax =',int(np.max(Lmax.vertices[:,int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0])))
-    # textbox = r'$L_{max} = $' + str(int(np.max(Lmax.vertices[:,int((result[1][0]+result[1][-1])/2)])*inc-np.abs(result[0][0]))) + ' m'
-    # plt.text(20,2*np.max(result[1])-10,textbox)
-
+    plt.show()
 #%%
 
 #absolut error [mg/l]
@@ -266,4 +249,3 @@ if __name__ ==  '__main__':
     plt.ticklabel_format(axis='both', style='scientific', useMathText=True, useOffset=True, scilimits=(0,2))
     plt.xticks(np.linspace(0, 2*np.pi, 7), np.linspace(0, 360, 7))
     plt.xlim([0, 2*np.pi])
-    plt.savefig('fig_supp1.pdf')
