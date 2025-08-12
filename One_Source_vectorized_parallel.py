@@ -16,12 +16,8 @@ import timeit
 from datetime import timedelta
 import multiprocessing as mp
 
-import sys
-import importlib.metadata as metadata
-
 
 #Parameter
-element_type = 'circle'     
 r = 1
 alpha_l = 2
 alpha_t = 0.05
@@ -33,7 +29,7 @@ gamma = 3.5
 d = np.sqrt((r*np.sqrt(alpha_l/alpha_t))**2-r**2)           #semi-focal distance: c**2 = a**2 - b**2 --> c = +/-SQRT(a**2 - b**2)
 q = (d**2*beta**2)/4
 # print(d,q)
-n = 7             #Number of terms in mathieu series -1
+n = 9             #Number of terms in mathieu series -1
 M = 100          #Number of Control Points, 5x overspecification
 
 #wrapper xy to eta psi
@@ -88,8 +84,7 @@ y1 = r*np.sin(phi)
 #elliptic coordinates
 uv_vec = np.vectorize(uv)
 psi1 = uv_vec(x1, y1)[1]
-if element_type == 'circle':
-    eta1 = uv_vec(x1, y1)[0]
+eta1 = uv_vec(x1, y1)[0]
 
 #Mathieu Functions
 m = mf.mathieu(q)
@@ -132,9 +127,8 @@ Coeff = np.linalg.lstsq(F_M, F, rcond=None)
 
 #comprehensive solution
 def c(x, y):
-    if element_type == 'circle':
-        if (x**2+y**2)<=r**2:
-            return C0
+    if (x**2+y**2)<=r**2:
+        return C0
     
 
     eta = uv(x, y)[0]
@@ -224,9 +218,8 @@ def run():
 
 #absolut error [mg/l]
     phi2 = np.linspace(0, 2*np.pi, 360)
-    if element_type == 'circle':
-        x_test = (r + 1e-9) * np.cos(phi2)
-        y_test = (r + 1e-9) * np.sin(phi2)
+    x_test = (r + 1e-9) * np.cos(phi2)
+    y_test = (r + 1e-9) * np.sin(phi2)
     
 
     Err = []
