@@ -16,6 +16,31 @@ import timeit
 from datetime import timedelta
 import multiprocessing as mp
 
+import sys
+import importlib.metadata as metadata
+
+def get_imported_packages_versions():
+    packages = set()
+
+    for name in sys.modules.keys():
+        if "." in name:
+            pkg = name.split(".")[0]  # top-level package
+        else:
+            pkg = name
+
+        try:
+            version = metadata.version(pkg)
+            packages.add((pkg, version))
+        except metadata.PackageNotFoundError:
+            pass  # skip built-ins and stdlib modules
+
+    for pkg, version in sorted(packages):
+        print(f"{pkg}=={version}")
+
+# Example usage
+get_imported_packages_versions()
+
+
 #Parameter
 element_type = 'circle'     # can be either 'line' or 'circle'
 r = 1

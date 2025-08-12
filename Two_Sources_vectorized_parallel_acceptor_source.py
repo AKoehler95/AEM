@@ -170,7 +170,7 @@ for v in range(0, M):
     F.append(F_target(x3[v], C1)[0])
 
 Coeff = np.linalg.lstsq(F_M, F, rcond=None)
-print(Coeff[0])
+# print(Coeff[0])
 
 #%%
 def c(x, y):
@@ -260,7 +260,7 @@ def run():
     cbar_ca.set_ticks(Plume_ca.levels)  # Ensure it uses the same tick positions
     cbar_ca.set_ticklabels([f"{abs(level):.0f}" for level in Plume_ca.levels])
 
-    plt.subplots_adjust(bottom=0)  # Increase if needed
+    # plt.subplots_adjust(bottom=0)  # Increase if needed
 
     # Get one of the original colorbar positions to reuse width/height
     bar_height = 0.01

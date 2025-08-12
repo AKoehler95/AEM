@@ -32,7 +32,7 @@ q = (d**2*beta**2)/4
 n = 9             #Number of terms in mathieu series
 M = 100           #Number of Control Points, 5x overspecification
 
-inc = 0.1      #discretisation
+inc = 0.2      #discretisation
 
 #Mathieu Functions
 m = mf.mathieu(q)
@@ -265,7 +265,7 @@ def run():
     cbar_ca.set_ticks(Plume_ca.levels)  # Ensure it uses the same tick positions
     cbar_ca.set_ticklabels([f"{abs(level):.0f}" for level in Plume_ca.levels])
 
-    plt.subplots_adjust(bottom=0)  # Increase if needed
+    # plt.subplots_adjust(bottom=0)  # Increase if needed
 
     # Get one of the original colorbar positions to reuse width/height
     bar_height = 0.01

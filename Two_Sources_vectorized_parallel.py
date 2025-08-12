@@ -170,7 +170,7 @@ for v in range(0, M):
     F.append(F_target(x3[v], C1)[0])
 
 Coeff = np.linalg.lstsq(F_M, F, rcond=None)
-print(Coeff[0])
+# print(Coeff[0])
 
 #%%
 def c(x, y):
@@ -203,7 +203,7 @@ def c(x, y):
 #%%
 # #concentration array for plotting purpose
 
-inc = 0.1
+inc = 0.5
 # Define a helper function for `Pool.map`
 def compute_conc(point):
     x, y = point
@@ -248,7 +248,7 @@ def run():
     plt.xlabel('$x$ (m)')
     plt.ylabel('$y$ (m)')
 
-    plt.xticks(range(len(result[0]))[::int(50/inc)], result[0][::int(50/inc)].round(0))
+    plt.xticks(range(len(result[0]))[::int(100/inc)], result[0][::int(100/inc)].round(0))
     plt.yticks(range(len(result[1]))[::int(10/inc)], result[1][::int(10/inc)].round(0))
     Plume_cd = plt.contourf(result[2], levels=np.linspace(0, C0, 11), cmap='Reds')
     Plume_ca = plt.contourf(result[2], levels=np.linspace(-8.01, 0, 9), cmap='Blues_r')
@@ -260,7 +260,7 @@ def run():
     cbar_ca.set_ticks(Plume_ca.levels)  # Ensure it uses the same tick positions
     cbar_ca.set_ticklabels([f"{abs(level):.0f}" for level in Plume_ca.levels])
 
-    plt.subplots_adjust(bottom=0)  # Increase if needed
+    # plt.subplots_adjust(bottom=0)  # Increase if needed
 
     # Get one of the original colorbar positions to reuse width/height
     bar_height = 0.01

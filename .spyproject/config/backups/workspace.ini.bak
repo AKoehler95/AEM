@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['Two_Sources_vectorized_parallel_vertical.py', 'One_Source_vectorized_parallel.py']
+recent_files = ['One_Source_vectorized_parallel.py', 'Two_Sources_vectorized_parallel.py', 'Two_Sources_vectorized_parallel_vertical.py', 'Two_Sources_vectorized_parallel_acceptor_source.py']
 
 [main]
 version = 0.2.0
