@@ -19,30 +19,9 @@ import multiprocessing as mp
 import sys
 import importlib.metadata as metadata
 
-def get_imported_packages_versions():
-    packages = set()
-
-    for name in sys.modules.keys():
-        if "." in name:
-            pkg = name.split(".")[0]  # top-level package
-        else:
-            pkg = name
-
-        try:
-            version = metadata.version(pkg)
-            packages.add((pkg, version))
-        except metadata.PackageNotFoundError:
-            pass  # skip built-ins and stdlib modules
-
-    for pkg, version in sorted(packages):
-        print(f"{pkg}=={version}")
-
-# Example usage
-get_imported_packages_versions()
-
 
 #Parameter
-element_type = 'circle'     # can be either 'line' or 'circle'
+element_type = 'circle'     
 r = 1
 alpha_l = 2
 alpha_t = 0.05
@@ -111,8 +90,6 @@ uv_vec = np.vectorize(uv)
 psi1 = uv_vec(x1, y1)[1]
 if element_type == 'circle':
     eta1 = uv_vec(x1, y1)[0]
-if element_type == 'line':
-    eta1 = np.zeros(M)
 
 #Mathieu Functions
 m = mf.mathieu(q)
@@ -158,9 +135,7 @@ def c(x, y):
     if element_type == 'circle':
         if (x**2+y**2)<=r**2:
             return C0
-    if element_type == 'line':
-        if x == 0 and -r < y < r:
-            return C0
+    
 
     eta = uv(x, y)[0]
     psi = uv(x, y)[1]
@@ -252,10 +227,7 @@ def run():
     if element_type == 'circle':
         x_test = (r + 1e-9) * np.cos(phi2)
         y_test = (r + 1e-9) * np.sin(phi2)
-    if element_type == 'line':
-        x_test = np.linspace(0, 0, 360)
-        y_test = (r + 1e-9) * np.sin(phi2) #np.linspace(-r, r, 360)
-
+    
 
     Err = []
     for i in range(0, 360, 1):
