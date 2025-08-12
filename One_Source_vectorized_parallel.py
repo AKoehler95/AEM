@@ -16,7 +16,6 @@ import timeit
 from datetime import timedelta
 import multiprocessing as mp
 
-
 #Parameter
 element_type = 'circle'     # can be either 'line' or 'circle'
 r = 1
@@ -179,8 +178,9 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
 
     return xaxis, yaxis, Conc
 
+
 # Run the function
-if __name__ ==  '__main__':
+def run():
     start = timeit.default_timer()
 
     result = Conc_array(0, 400+inc, -5, 5+inc, inc)
@@ -249,3 +249,7 @@ if __name__ ==  '__main__':
     plt.ticklabel_format(axis='both', style='scientific', useMathText=True, useOffset=True, scilimits=(0,2))
     plt.xticks(np.linspace(0, 2*np.pi, 7), np.linspace(0, 360, 7))
     plt.xlim([0, 2*np.pi])
+    return result
+
+if __name__ ==  '__main__':
+    run()

@@ -231,7 +231,7 @@ def Conc_array(x_min, x_max, y_min, y_max, inc):
     return xaxis, yaxis, Conc
 
 # Run the function
-if __name__ ==  '__main__':
+def run():
     start = timeit.default_timer()
 
     result = Conc_array(0, 1200+inc, -10, 20+inc, inc)
@@ -310,3 +310,7 @@ if __name__ ==  '__main__':
     plt.ylabel('Concentration (mg/l)')
     plt.xticks(np.linspace(0, 2*np.pi, 13), np.linspace(0, 360, 13).astype(int))
     plt.legend()
+    return result
+    
+if __name__ ==  '__main__':
+    run()
