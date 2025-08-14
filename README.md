@@ -12,7 +12,7 @@ We provide Python scripts for the following cases:
 3. A donor and an acceptor source element.
 4. A donor source element in a vertical domain.
 
-5. A Jupyter Notebook file, which compiles all results from scripts 1-4.
+5. A Jupyter Notebook file, which compiles all results from scripts 1-4. Note that The single donor source case is implemented in an interactive way.
 
 6. Script for plotting the results of the sensitivity analysis
 
